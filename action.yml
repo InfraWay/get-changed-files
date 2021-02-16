@@ -17,9 +17,14 @@ inputs:
   format:
     description: >
       Format of the steps output context.
-      Can be 'space-delimited', 'csv', or 'json'.
+      Can be 'space-delimited', 'csv', 'json' or 'object'.
     required: true
     default: space-delimited
+  filter:
+    description: >
+      Regex for filtering files, for example to get files of specific type.
+    required: false
+    default: ''
 outputs:
   all:
     description: >

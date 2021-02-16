@@ -3517,9 +3517,10 @@ function run() {
             // Create GitHub client with the API token.
             const client = new github_1.GitHub(core.getInput('token', { required: true }));
             const format = core.getInput('format', { required: true });
+            const filter = core.getInput('filter', { required: false });
             // Ensure that the format parameter is set properly.
-            if (format !== 'space-delimited' && format !== 'csv' && format !== 'json') {
-                core.setFailed(`Format must be one of 'string-delimited', 'csv', or 'json', got '${format}'.`);
+            if (format !== 'space-delimited' && format !== 'csv' && format !== 'json' && format !== 'object') {
+                core.setFailed(`Format must be one of 'string-delimited', 'csv', 'json', or 'object', got '${format}'.`);
             }
             // Debug log the payload.
             core.debug(`Payload keys: ${Object.keys(github_1.context.payload)}`);
@@ -3573,8 +3574,12 @@ function run() {
             // Get the changed files from the response payload.
             const files = response.data.files;
             const all = [], added = [], modified = [], removed = [], renamed = [], addedModified = [];
+            const re = filter ? new RegExp(filter, 'i') : false;
             for (const file of files) {
                 const filename = file.filename;
+                if (re && !filename.match(re)) {
+                    continue;
+                }
                 // If we're using the 'space-delimited' format and any of the filenames have a space in them,
                 // then fail the step.
                 if (format === 'space-delimited' && filename.includes(' ')) {
@@ -3633,6 +3638,20 @@ function run() {
                     renamedFormatted = JSON.stringify(renamed);
                     addedModifiedFormatted = JSON.stringify(addedModified);
                     break;
+                case 'object':
+                    // eslint-disable-next-line github/array-foreach
+                    all.forEach((f, i) => core.setOutput(`all${i}`, f));
+                    // eslint-disable-next-line github/array-foreach
+                    added.forEach((f, i) => core.setOutput(`added${i}`, f));
+                    // eslint-disable-next-line github/array-foreach
+                    modified.forEach((f, i) => core.setOutput(`modified${i}`, f));
+                    // eslint-disable-next-line github/array-foreach
+                    removed.forEach((f, i) => core.setOutput(`removed${i}`, f));
+                    // eslint-disable-next-line github/array-foreach
+                    renamed.forEach((f, i) => core.setOutput(`renamed${i}`, f));
+                    // eslint-disable-next-line github/array-foreach
+                    addedModified.forEach((f, i) => core.setOutput(`addedModified${i}`, f));
+                    return;
             }
             // Log the output values.
             core.info(`All: ${allFormatted}`);
