@@ -1,9 +1,9 @@
-name: Get All Changed Files
-description: Get all of the files changed/modified in a pull request or push's commits.
-author: Jitterbit, Inc.
+name: Get Git Changed Files
+description: Get all or filtered changed/modified files in a pull request or push's commits.
+author: Jitterbit, Inc., InfraWay
 branding:
   icon: file
-  color: purple
+  color: green
 runs:
   using: node12
   main: dist/index.js
